@@ -1,0 +1,16 @@
+{
+  "name": "beth(codes)",
+  "url": "https://beth.codes",
+  "baseurl": "",
+  "repo": "http://github.com/bethallchurch/bethallchurch.github.io",
+  "comments": false,
+  "author": {
+    "name": "Beth Allchurch"
+  },
+  "og_locale": "en_GB",
+  "social_links": {
+    "github": "bethallchurch",
+    "twitter": "beth_codes_"
+  },
+  "google_analytics": "UA-81698702-1"
+}

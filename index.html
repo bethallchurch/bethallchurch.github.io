@@ -1,0 +1,12 @@
+---
+layout: default
+---
+
+{%- for post in collections.post -%}
+<article class="mb-8">
+  <h2 class="font-sans md:text-2xl text-xl leading-relaxed mt-0 mb-1">
+    <a class="no-underline" href="{{ site.baseurl }}{{ post.url }}">{{ post.data.title }}</a>
+  </h2>
+  <p class="text-sm font-bold mb-0">{{ post.data.date | date: "%B %e, %Y" }}</p>
+</article>
+{% endfor %}

@@ -1,0 +1,25 @@
+{
+  "name": "bethallchurch.github.io",
+  "version": "2.0.0",
+  "private": true,
+  "main": "index.js",
+  "author": "Beth <bethan.allchurch@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "eleventy --serve & postcss styles/tailwind.css --o _tmp/style.css --watch",
+    "build": "ELEVENTY_PRODUCTION=true eleventy & NODE_ENV=production postcss styles/tailwind.css --o _site/styles/style.css"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^0.11.1",
+    "@jamshop/eleventy-plugin-esbuild": "^1.0.2",
+    "autoprefixer": "^10.2.4",
+    "cssnano": "^4.1.10",
+    "postcss-cli": "^8.3.1",
+    "stylelint-config-recommended": "^3.0.0",
+    "tailwindcss": "^2.0.3"
+  },
+  "dependencies": {
+    "postcss": "^8.2.6",
+    "prismjs": "^1.23.0"
+  }
+}

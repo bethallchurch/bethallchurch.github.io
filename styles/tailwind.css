@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-black;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold;
+  }
+
+  h2 {
+    @apply my-9 text-xl;
+  }
+
+  h3 {
+    @apply my-7 text-lg;
+  }
+
+  p {
+    @apply mb-5;
+  }
+
+  a {
+    @apply underline;
+  }
+
+  li {
+    @apply leading-loose;
+  }
+
+  pre[class*='language-'],
+  code[class*='language-'] {
+    @apply bg-gray-100;
+  }
+
+  pre[class*='language-'] {
+    @apply mb-7 p-5 text-sm overflow-x-auto block;
+    @screen md {
+      @apply text-base;
+    }
+  }
+}
