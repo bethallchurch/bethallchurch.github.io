@@ -15,7 +15,7 @@ module.exports =  eleventyConfig => {
     entryPoints: {
       main: "./js/index.js"
     },
-    output: "_site/js"
+    output: "_site"
   })
 
   eleventyConfig.addShortcode("version", () => String(Date.now()))
