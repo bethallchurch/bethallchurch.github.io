@@ -20,6 +20,8 @@ module.exports =  eleventyConfig => {
 
   eleventyConfig.addShortcode("version", () => String(Date.now()))
 
+  eleventyConfig.addPassthroughCopy("CNAME")
+
   return {
     dir: {
       input: "./",
