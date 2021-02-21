@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      beth(codes)
+    </title>
+
+    <meta charset="utf-8" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+
+<meta name="description" content="" />
+<meta property="og:description" content="" />
+
+<meta name="author" content="beth(codes)" />
+
+
+
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@200;400;700&display=swap" rel="stylesheet">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/style.css"
+    />
+  </head>
+
+  <body>
+    <div class="container mx-auto">
+    <header class="flex justify-between content-center py-6 border-black border-b mb-12">
+      <h1 class="font-monospace font-extrabold text-2xl tracking-wide">
+        <a class="no-underline" href="https://bethallchurch.github.io">beth(codes)</a>
+      </h1>
+      <div><a class="text-xl mr-3 text-gray-800"
+  href="https://github.com/bethallchurch"
+  ><i class="fa fa-github" aria-hidden="true"></i></a
+> <a class="text-xl text-gray-800"
+  href="https://www.twitter.com/beth_codes_"
+  ><i class="fa fa-twitter" aria-hidden="true"></i></a
+>
+</div>
+    </header>
+
+    <main>
+<article class="pb-14">
+  <h1 class="mb-10 font-sans text-3xl font-bold">JavaScript and Functional Programming</h1>
+  <p class="border-black border p-6 mb-10">This is a write up of my notes (plus some further research) from Kyle Simpson's excellent class <b>Functional-Light JavaScript</b> (slides <a href="https://speakerdeck.com/getify/functional-light-javascript">here</a>) on 29 of June, 2016.</p>
+<p>Object-oriented programming has long been the dominant paradigm in JavaScript. Recently, however, there has been a growing interest in functional programming. Functional programming is a style of programming that emphasises minimising the number of changes to a program's state (known as <em>side effects</em>). To this end, it encourages the use of <em>immutable</em> data and <em>pure</em> (side effect-free) functions. It also favours a <em>declarative</em> style and encourages the use of well-named functions that allow you to write programs by describing what you want to happen, with the implementation details packaged away out of immediate sight.</p>
+<p>Although there are tensions between object-oriented and functional approaches, they are not mutually exclusive. JavaScript has the tools to support both paradigms. Even without using it exclusively as a functional language, there are concepts and best practices from the functional approach that we can use to make our own code cleaner, more readable, and easier to reason about.</p>
+<h2>Minimise Side Effects</h2>
+<p>A <em>side effect</em> is a change that is not local to the function that caused it. A function might do something like manipulate the DOM, modify the value of a variable in a higher level scope or write data to a database. The results of these actions are side effects.</p>
+<pre><code class="language-javascript">// A function with a side effect
+var x = 10
+
+const myFunc = function (y) {
+  x = x + y
+}
+
+myFunc(3)
+console.log(x) // 13
+
+myFunc(3)
+console.log(x) // 16
+</code></pre>
+<p>Side effects are not inherently evil. A program that produced no side effects would not affect the world, and so there would be no point to it (other than perhaps as a theoretical curiousity). They are, however, dangerous and should be avoided wherever they are not strictly necessary.</p>
+<p>When a function produces a side effect you have to know more than just its inputs and output to understand what that function does. You need to know about the context and history of the state of the program, which makes the function harder to understand. Side effects can cause bugs by interacting in unpredictable ways, and the functions that produce them are harder to test thanks to their reliance on the context and history of the program's state.</p>
+<p>Minimising side effects is such a fundamental principle of functional programming that most of the following sections can be understood as outlining techniques to avoid them.</p>
+<h2>Treat Data as Immutable</h2>
+<p>A mutation is an in-place change to a value. An immutable value is a value that, once created, can never be changed. In JavaScript, simple values like numbers, strings and booleans are immutable. However, data structures like objects and arrays are mutable.</p>
+<pre><code class="language-javascript">// the push method mutates the array it's called on
+const x = [1, 2]
+console.log(x) // [1, 2]
+
+x.push(3)
+console.log(x) // [1, 2, 3]
+</code></pre>
+<p>Why would we want to avoid mutating data?</p>
+<p>A mutation is a side effect. The fewer things that change in a program, the less there is to keep track of, and the result is a simpler program.</p>
+<p>JavaScript only has limited tools available to enforce immutability on data structures like objects and arrays. Object immutability can be enforced with <code>Object.freeze</code>, but only one level deep:</p>
+<pre><code class="language-javascript">const frozenObject = Object.freeze({
+  valueOne: 1,
+  valueTwo: { nestedValue: 1 },
+})
+frozenObject.valueOne = 2 // not allowed
+frozenObject.valueTwo.nestedValue = 2 // allowed!
+</code></pre>
+<p>There are, however, several excellent libraries out there that solve this issue, the most well-known of which is <a href="https://facebook.github.io/immutable-js/">Immutable</a>.</p>
+<p>For most applications, using a library to enforce immutability is overkill. In most cases you will gain most of the benefits of immutable data simply by treating data as though it were immutable.</p>
+<h3>Avoiding Mutations: Arrays</h3>
+<p>Array methods in JavaScript can broadly be divided into <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/prototype#Mutator_methods">mutator methods</a> and non-mutator methods. Mutator methods should be avoided where possible.</p>
+<p>For example, <code>concat</code> can be used instead of <code>push</code>. <code>push</code> mutates the original array, whereas <code>concat</code> returns a new array comprised of the array it was called on and the array provided as its argument, leaving the original array intact.</p>
+<pre><code class="language-javascript">// push mutates arrays.
+const arrayOne = [1, 2, 3]
+arrayOne.push(4)
+
+console.log(arrayOne) // [1, 2, 3, 4]
+
+// concat creates a new array and leaves the original unchanged.
+const arrayTwo = [1, 2, 3]
+const arrayThree = arrayTwo.concat([4])
+
+console.log(arrayTwo) // [1, 2, 3]
+console.log(arrayThree) // [1, 2, 3, 4]
+</code></pre>
+<p>Other useful non-mutator array methods include <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map"><code>map</code></a>, <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter"><code>filter</code></a>, and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce"><code>reduce</code></a>.</p>
+<h3>Avoiding Mutations: Objects</h3>
+<p>Instead of directly editing objects, you can use <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign"><code>Object.assign</code></a>, which copies the properties of source objects into a target object and then returns it. If you always use an empty object as the target object, you can use <code>Object.assign</code> to avoid directly editing objects.</p>
+<pre><code class="language-javascript">const objectOne = { valueOne: 1 }
+const objectTwo = { valueTwo: 2 }
+
+const objectThree = Object.assign({}, objectOne, objectTwo)
+
+console.log(objectThree) // { valueOne : 1, valueTwo : 2 }
+</code></pre>
+<h3>Note on <code>const</code></h3>
+<p><code>const</code> is useful, but it does not make your data immutable. It prevents your variables from being reassigned. These two things should not be conflated.</p>
+<pre><code class="language-javascript">const x = 1
+x = 2 // not allowed
+
+const myArray = [1, 2, 3]
+myArray = [0, 2, 3] // not allowed
+
+myArray[0] = 0 // allowed!
+</code></pre>
+<h2>Write Pure Functions</h2>
+<p>A <em>pure function</em> is a function that does not change the program's state and does not produce an observable side effect. The output of a pure function relies solely on its input values. Wherever and whenever a pure function is called, its return value will always be the same when given the same inputs.</p>
+<p>Pure functions are an important tool for keeping side effects to a minimum. In addition, their indifference to context make them highly testable and reusable.</p>
+<p><code>myFunc</code> from the section on side effects is an impure function: note how it's called twice with the same input and gives a different result each time. It could, however, be re-written as a pure function:</p>
+<pre><code class="language-javascript">// Make the global variable local.
+const myFunc = function (y) {
+  const x = 10
+  return x + y
+}
+
+console.log(myFunc(3)) // 13
+console.log(myFunc(3)) // 13
+</code></pre>
+<pre><code class="language-javascript">// Pass x as an argument.
+const x = 10
+
+const myFunc = function (x, y) {
+  return x + y
+}
+
+console.log(myFunc(x, 3)) // 13
+console.log(myFunc(x, 3)) // 13
+</code></pre>
+<p>Ultimately, your program will always produce some side effects. Where they occur they should be handled carefully and their effects constrained and contained as much as possible.</p>
+<h2>Write Function-Generating Functions</h2>
+<p>Find someone who has never programmed before and ask them to guess what the following pieces of code do.</p>
+<p>Example One:</p>
+<pre><code class="language-javascript">const numbers = [1, 2, 3]
+
+for (let i = 0; i &lt; numbers.length; i++) {
+  console.log(numbers[i])
+}
+</code></pre>
+<p>Example Two:</p>
+<pre><code class="language-javascript">const numbers = [1, 2, 3]
+
+const print = function (input) {
+  console.log(input)
+}
+
+numbers.forEach(print)
+</code></pre>
+<p>Everyone I've tried this test on has had more luck with the second example. Example One exemplifies an <em>imperative</em> approach to printing out a list of numbers. Example Two exemplifies a <em>declarative</em> approach. By packaging away the details of how to loop through an array and how to print to the console into the functions <code>forEach</code> and <code>print</code>, respectively, we can express <em>what</em> we want our program to do without needing to go into <em>how</em> to do it. This makes for highly readable code. The last line of Example Two is very close to English.</p>
+<p>Adopting this approach involves writing a lot of functions. This process can be made <a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a>-er by writing functions to generate new functions from existing ones.</p>
+<p>There are two features of JavaScript in particular that make this kind of function generation possible. The first is <em>closure</em>. Closure is the ability of functions to access variables from containing scopes, even when those scopes no longer exist. The second is that JavaScript treats functions as values. This makes it possible to write <em>higher-order functions</em>, which are functions that take other functions as arguments and / or return functions as their output.</p>
+<p>Combined, these features allow you to write functions that return other functions which &quot;remember&quot; the arguments passed to the function that generated them, and are able to use those arguments elsewhere in the program.</p>
+<h3>Function Composition</h3>
+<p>Functions can be combined to form new functions through <em>function composition</em>. Here is an example:</p>
+<pre><code class="language-javascript">// The function addThenSquare is made by combining the functions add and square.
+const add = function (x, y) {
+  return x + y
+}
+
+const square = function (x) {
+  return x * x
+}
+
+const addThenSquare = function (x, y) {
+  return square(add(x, y))
+}
+</code></pre>
+<p>You may find yourself repeating this pattern of generating a more complex function from smaller functions. Often it's more efficient to write a function that does the composition for you:</p>
+<pre><code class="language-javascript">const add = function (x, y) {
+  return x + y
+}
+
+const square = function (x) {
+  return x * x
+}
+
+const composeTwo = function (f, g) {
+  return function (x, y) {
+    return g(f(x, y))
+  }
+}
+
+const addThenSquare = composeTwo(add, square)
+</code></pre>
+<p>You could go even further and write a more general composition functions:</p>
+<pre><code class="language-javascript">// This version of composeTwo can accept any number of arguments for the initial function.
+const composeTwo = function (f, g) {
+  return function (...args) {
+    return g(f(...args))
+  }
+}
+
+// composeMany can accept any number of functions as well as any number of arguments for the
+// initial function.
+const composeMany = function (...args) {
+  const funcs = args
+  return function (...args) {
+    funcs.forEach((func) =&gt; {
+      args = [func.apply(this, args)]
+    })
+    return args[0]
+  }
+}
+</code></pre>
+<p>The exact form of your composition function will depend on the level of generality you need and the kind of API you prefer.</p>
+<h3>Partial Function Application</h3>
+<p><em>Partial function application</em> is the process of fixing the value of one or more of a function's arguments, and then returning the function to be fully invoked later.</p>
+<p>In the following example, <code>double</code>, <code>triple</code>, and <code>quadruple</code> are partial applications of <code>multiply</code>.</p>
+<pre><code class="language-javascript">const multiply = function (x, y) {
+  return x * y
+}
+
+const partApply = function (fn, x) {
+  return function (y) {
+    return fn(x, y)
+  }
+}
+
+const double = partApply(multiply, 2)
+const triple = partApply(multiply, 3)
+const quadruple = partApply(multiply, 4)
+</code></pre>
+<h3>Currying</h3>
+<p><em>Currying</em> is the process of translating a function that takes multiple arguments into a series of functions that each take one argument.</p>
+<pre><code class="language-javascript">const multiply = function (x, y) {
+  return x * y
+}
+
+const curry = function (fn) {
+  return function (x) {
+    return function (y) {
+      return fn(x, y)
+    }
+  }
+}
+
+const curriedMultiply = curry(multiply)
+
+const double = curriedMultiply(2)
+const triple = curriedMultiply(3)
+const quadruple = curriedMultiply(4)
+
+console.log(triple(6)) // 18
+</code></pre>
+<p>Currying and partial application are conceptually similar (and you'll probably never need both), but still distinct. The main difference is that currying will always produce a nested chain of functions that each accept only one argument, whereas partial application can return functions that accept more than one argument. This distinction is clearer when you compare their effects on functions that accept at least three arguments:</p>
+<pre><code class="language-javascript">const multiply = function (x, y, z) {
+  return x * y * z
+}
+
+const curry = function (fn) {
+  return function (x) {
+    return function (y) {
+      return function (z) {
+        return fn(x, y, z)
+      }
+    }
+  }
+}
+
+const partApply = function (fn, x) {
+  return function (y, z) {
+    return fn(x, y, z)
+  }
+}
+
+const curriedMultiply = curry(multiply)
+const partiallyAppliedMultiply = partApply(multiply, 10)
+
+console.log(curriedMultiply(10)(5)(2)) // 100
+console.log(partiallyAppliedMultiply(5, 2)) // 100
+</code></pre>
+<h2>Recursion</h2>
+<p>A <em>recursive</em> function is a function that calls itself until it reaches a base condition. Recursive functions are highly declarative. They're also elegant and very satisfying to write!</p>
+<p>Here's an example of a function that recursively calculates the factorial of a number:</p>
+<pre><code class="language-javascript">const factorial = function (n) {
+  if (n === 0) {
+    return 1
+  }
+  return n * factorial(n - 1)
+}
+
+console.log(factorial(10)) // 3628800
+</code></pre>
+<p>Using recursive functions in JavaScript requires some care. Every function call adds a new call frame to the call stack, and that call frame is popped off the call stack when the function returns. Recursive functions call themselves before they return, and so it's very easy for a recursive function to exceed the limits of the call stack and crash the program.</p>
+<p>However, this can be avoided with <em>tail call optimisation</em>.</p>
+<h3>Tail Call Optimisation</h3>
+<p>A tail call is a function call that is the last action of a function. Tail call optimisation is when the language compiler recognises tail calls and reuses the same call frame for them. This means that if you write recursive functions with tail calls, the limits of the call stack will never be exceeded by them as it will reuse the same frame over and over.</p>
+<p>Here is the recursive function from above rewritten to take advantage of tail call optimisation:</p>
+<pre><code class="language-javascript">const factorial = function (n, base) {
+  if (n === 0) {
+    return base
+  }
+  base *= n
+  return factorial(n - 1, base)
+}
+
+console.log(factorial(10, 1)) // 3628800
+</code></pre>
+<p>Support for proper tail calls is included in the <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-tail-position-calls">ES2015 language specification</a>, but is currently unsupported in most environments. You can check whether you can use them <a href="https://kangax.github.io/compat-table/es6/">here</a>.</p>
+<h2>Summary</h2>
+<p>Functional programming contains many ideas that we can use to make our own code simpler and better. Pure functions and immutable data minimise the hazards of side effects. Declarative programming maximises code readability. These are important tools that should be embraced when fighting against complexity.</p>
+<h2>Corrections</h2>
+<ul>
+<li>[09-09-2016] Forgot to return the innermost function in <code>partApply</code>, in the section on partial function application. Thank you to Richard Bultitude for spotting the mistake!</li>
+</ul>
+<h2>Resources</h2>
+<h3>General</h3>
+<ul>
+<li><a href="https://www.sitepoint.com/series/introduction-functional-javascript/">SitePoint: An Introduction to Functional JavaScript</a></li>
+<li><a href="http://www.cs.utexas.edu/~shmat/courses/cs345/whyfp.pdf">John Hughes: Why Functional Programming Matters</a></li>
+<li><a href="http://www.vasinov.com/blog/16-months-of-functional-programming/">Vasily Vasinov: 16 Months of Functional Programming</a></li>
+<li><a href="http://stephen-young.me.uk/2013/01/20/functional-programming-with-javascript.html">Stephen Young: Functional programming with Javascript</a></li>
+<li><a href="http://jrsinclair.com/articles/2016/gentle-introduction-to-functional-javascript-intro/">James Sinclair: A Gentle Introduction to Functional JavaScript</a></li>
+</ul>
+<h3>Side Effects</h3>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Side_effect_(computer_science)">Wikipedia: Side effect (computer science)</a></li>
+<li><a href="http://stackoverflow.com/questions/763835/are-side-effects-a-good-thing">Stack Overflow: Are side effects a good thing?</a></li>
+</ul>
+<h3>Immutability</h3>
+<ul>
+<li><a href="https://www.sitepoint.com/immutability-javascript/">Site Point: Immutability in JavaScript</a></li>
+<li><a href="https://auth0.com/blog/2016/03/23/intro-to-immutable-js/">Auth0: Introduction to Immutable.js and Functional Programming Concepts</a></li>
+<li><a href="http://programmers.stackexchange.com/questions/151733/if-immutable-objects-are-good-why-do-people-keep-creating-mutable-objects">Stack Exchange: If immutable objects are good, why do people keep creating mutable objects?</a></li>
+<li><a href="http://stackoverflow.com/questions/34385243/why-is-immutability-so-importantor-needed-in-javascript">Stack Overflow: Why is immutability so important(or needed) in javascript?</a></li>
+<li><a href="http://www.youtube.com/watch?v=I7IdS-PbEgI&amp;t=14m8s">React.js Conf 2015 - Immutable Data and React (video)</a></li>
+<li><a href="https://egghead.io/lessons/javascript-redux-avoiding-array-mutations-with-concat-slice-and-spread">Redux: Avoiding Array Mutations with concat(), slice(), and ...spread (video)</a></li>
+<li><a href="https://egghead.io/lessons/javascript-redux-avoiding-object-mutations-with-object-assign-and-spread">Redux: Avoiding Object Mutations with Object.assign() and ...spread (video)</a></li>
+</ul>
+<h3>Pure Functions</h3>
+<ul>
+<li><a href="https://egghead.io/lessons/javascript-redux-pure-and-impure-functions">Redux: Pure and Impure Functions</a></li>
+</ul>
+<h3>Function Generation</h3>
+<ul>
+<li><a href="http://eloquentjavascript.net/05_higher_order.html">Eloquent JavaScript: Higher-Order Functions</a></li>
+<li><a href="http://scott.sauyet.com/Javascript/Talk/Compose/2013-05-22/#slide-0">Scott Sauyet: Compose Yourself: Fun with Functions</a></li>
+<li><a href="http://www.vasinov.com/blog/on-currying-and-partial-function-application/">Vasily Vasinov: On Currying and Partial Function Application</a></li>
+<li><a href="http://www.2ality.com/2011/09/currying-vs-part-eval.html">2ality: Currying versus partial application</a></li>
+</ul>
+<h3>Recursion</h3>
+<ul>
+<li><a href="http://stackoverflow.com/questions/3021/what-is-recursion-and-when-should-i-use-it">Stack Overflow: What is recursion and when should I use it?</a></li>
+<li><a href="https://medium.com/functional-javascript/recursion-282a6abbf3c5#.i913o81g3">Medium: Recursion</a></li>
+<li><a href="http://benignbemine.github.io/2015/07/19/es6-tail-calls/">Kyle Owen: ES6 Tail Call Optimization Explained</a></li>
+<li><a href="https://taylodl.wordpress.com/2013/06/07/functional-javascript-tail-call-optimization-and-trampolines/">Don Taylor: Functional JavaScript – Tail Call Optimization and Trampolines</a></li>
+<li><a href="http://www.integralist.co.uk/posts/js-recursion.html">Mark McDonnell: Understanding recursion in functional JavaScript programming</a></li>
+</ul>
+
+</article>
+</main>
+
+    
+<!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-81698702-1', 'auto');
+  ga('send', 'pageview', {
+    'page': '/posts/javascript-and-functional-programming/',
+    'title': 'undefined'
+  });
+</script>
+<!-- End Google Analytics -->
+
+
+
+    <script src="/js/main.js"></script>
+  </body>
+</div>
+</html>
