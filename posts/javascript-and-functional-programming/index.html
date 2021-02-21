@@ -39,8 +39,8 @@
   </head>
 
   <body>
-    <div class="container mx-auto">
-    <header class="flex justify-between content-center py-6 border-black border-b mb-12">
+    <div class="container mx-auto px-6">
+    <header class="flex justify-between content-center py-6 border-black border-b mb-8 md:mb-12">
       <h1 class="font-monospace font-extrabold text-2xl tracking-wide">
         <a class="no-underline" href="https://bethallchurch.github.io">beth(codes)</a>
       </h1>
@@ -56,7 +56,7 @@
 
     <main>
 <article class="pb-14">
-  <h1 class="mb-10 font-sans text-3xl font-bold">JavaScript and Functional Programming</h1>
+  <h1 class="mb-10 font-sans text-2xl md:text-3xl font-bold">JavaScript and Functional Programming</h1>
   <p class="border-black border p-6 mb-10">This is a write up of my notes (plus some further research) from Kyle Simpson's excellent class <b>Functional-Light JavaScript</b> (slides <a href="https://speakerdeck.com/getify/functional-light-javascript">here</a>) on 29 of June, 2016.</p>
 <p>Object-oriented programming has long been the dominant paradigm in JavaScript. Recently, however, there has been a growing interest in functional programming. Functional programming is a style of programming that emphasises minimising the number of changes to a program's state (known as <em>side effects</em>). To this end, it encourages the use of <em>immutable</em> data and <em>pure</em> (side effect-free) functions. It also favours a <em>declarative</em> style and encourages the use of well-named functions that allow you to write programs by describing what you want to happen, with the implementation details packaged away out of immediate sight.</p>
 <p>Although there are tensions between object-oriented and functional approaches, they are not mutually exclusive. JavaScript has the tools to support both paradigms. Even without using it exclusively as a functional language, there are concepts and best practices from the functional approach that we can use to make our own code cleaner, more readable, and easier to reason about.</p>
@@ -214,15 +214,16 @@ const composeTwo = function (f, g) {
 const addThenSquare = composeTwo(add, square)
 </code></pre>
 <p>You could go even further and write a more general composition functions:</p>
-<pre><code class="language-javascript">// This version of composeTwo can accept any number of arguments for the initial function.
+<pre><code class="language-javascript">// This version of composeTwo can accept any number of arguments for the 
+// initial function.
 const composeTwo = function (f, g) {
   return function (...args) {
     return g(f(...args))
   }
 }
 
-// composeMany can accept any number of functions as well as any number of arguments for the
-// initial function.
+// composeMany can accept any number of functions as well as any number of 
+// arguments for the initial function.
 const composeMany = function (...args) {
   const funcs = args
   return function (...args) {
